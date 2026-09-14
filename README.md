@@ -1,91 +1,61 @@
 # IIM Shillong Community Timetable
 
-Flutter + Firebase POC for PGP/PGPEx students at IIM Shillong.
+Personalized core + elective timetable for PGP/PGPEx students.
 
-Students sign in with an `@iimshillong.ac.in` email, ingest the official office Excel timetable, pick electives, see only the classes that apply to them, and get a local reminder 15 minutes before each session. Usage events are sent to Firebase Analytics so you can read KPIs in the Firebase console.
+**Current stack:** Next.js on [Vercel](https://vercel.com) + Postgres on [Neon](https://neon.tech). Firebase is no longer used.
+
+The Flutter Android/iOS project remains in this repo as an optional later client. The product you deploy is `web/`.
 
 ## Student flow
 
-1. **Login / register** with an institute email (Firebase Auth when configured; local demo mode otherwise).
-2. **Upload** the office `.xlsx` file, or load the bundled sample timetable.
-3. **Select electives**. Core subjects are always included.
-4. **Personalized timetable** shows core + chosen electives only.
-5. **Reminders** are scheduled with `flutter_local_notifications` (Asia/Kolkata, 15 minutes before start).
+1. Sign in / register with an `@iimshillong.ac.in` email.
+2. Upload the office `.xlsx` file, or load the bundled sample.
+3. Select electives (core subjects are always included).
+4. See a personalized timetable.
+5. Allow browser notifications for a reminder 15 minutes before class (Asia/Kolkata).
+
+Admin (`ADMIN_EMAILS`, default `shubham.pgpex26@iimshillong.ac.in`) can open **Usage KPIs** in the app. Events live in Neon: `app_open`, `login`, `file_upload`, `subject_selection`, `reminder_trigger`.
 
 ## Excel layout
-
-Header row (names are matched case-insensitively; extra columns are ignored):
 
 | Day | Start Time | End Time | Course Code | Subject | Type | Faculty | Venue |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Monday | 09:00 | 10:30 | PGPEX-C1 | Managerial Economics | Core | Faculty A | CH-1 |
 | Monday | 11:00 | 12:30 | PGPEX-E1 | FinTech Strategy | Elective | Faculty B | CH-2 |
 
-`Type` should be `Core` or `Elective`. Times may be 24-hour (`14:00`) or 12-hour (`2:00 PM`).
+## What you do next
 
-## Project structure
+### 1. Neon database
 
-```
-lib/
-  main.dart
-  app.dart                  # auth + session routing
-  app_bootstrap.dart        # Firebase / demo-mode startup
-  firebase_options.dart     # replace with flutterfire configure
-  models/
-  screens/
-  services/
-  utils/
-assets/sample_timetable.xlsx
-android/                    # applicationId in.ac.iimshillong.iim_shillong_community
-ios/                        # bundle id in.ac.iimshillong.iimShillongCommunity
-firestore.rules
-```
+1. Create a project at [neon.tech](https://neon.tech).
+2. Copy the connection string (`DATABASE_URL`).
+3. Tables are created automatically on first request (`users`, `office_timetable`, `user_electives`, `analytics_events`).
 
-## Firebase setup
+### 2. Vercel project
 
-1. Create a Firebase project.
-2. Enable **Authentication → Email/Password**.
-3. Create a Firestore database and publish `firestore.rules`.
-4. Enable **Google Analytics** (linked automatically on most new projects).
-5. From this repo:
+1. Import this GitHub repo into Vercel.
+2. Set **Root Directory** to `web`.
+3. Add environment variables:
 
-```bash
-dart pub global activate flutterfire_cli
-flutterfire configure
-```
-
-That command overwrites `lib/firebase_options.dart`, `android/app/google-services.json`, and `ios/Runner/GoogleService-Info.plist`. Until you do this, the app still **builds and runs in demo mode** (auth and timetable stay on-device).
-
-Optional Auth restriction: Firebase Console → Authentication → Settings → User actions, or block non-institute domains with a Cloud Function. The app also rejects any email that is not `@iimshillong.ac.in`.
-
-## Analytics KPIs (Firebase console)
-
-Events logged by the app (Analytics → Events):
-
-| Event | When |
+| Name | Value |
 | --- | --- |
-| `app_open` | App launch |
-| `login` | Successful sign-in / register |
-| `file_upload` | Office Excel ingested |
-| `subject_selection` | Electives saved |
-| `reminder_trigger` | Reminder scheduled (`phase=scheduled`) or opened (`phase=opened`) |
+| `DATABASE_URL` | Neon connection string |
+| `AUTH_SECRET` | long random string (`openssl rand -base64 32`) |
+| `ADMIN_EMAILS` | `shubham.pgpex26@iimshillong.ac.in` |
 
-You do not need an in-app admin dashboard; open [Firebase Analytics](https://console.firebase.google.com/) as the project owner.
+4. Deploy. Open the Vercel URL, register with your institute email, load the sample timetable, then check **Usage KPIs**.
 
-## Run locally
+### 3. Local run
 
 ```bash
-flutter pub get
-dart run tool/generate_sample_timetable.dart
-flutter test
-flutter run
+cd web
+cp .env.example .env.local
+# paste DATABASE_URL and AUTH_SECRET
+npm install
+npm test
+npm run dev
 ```
 
-- **Android:** `flutter build apk --debug` (verified in this environment)
-- **iOS:** on macOS, `flutter build ios --debug --no-codesign` (Xcode is required for a native iOS binary). GitHub Actions on `macos-latest` runs that compile. This Linux environment still compiles the Dart/iOS asset bundle with `flutter build bundle --target-platform=ios`.
+## Optional Flutter app
 
-## Android / iOS notes
-
-- minSdk 24, Java 17 desugaring for exact local notifications.
-- Notification permissions are requested at startup.
-- iOS requires a development team in Xcode for a device build.
+`lib/`, `android/`, and `ios/` are the earlier mobile POC. It still talks to Firebase placeholders. Pointing it at the Vercel API can be a follow-up; the hosted web app is the source of truth for data.
