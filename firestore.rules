@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedInInstitute() {
+      return request.auth != null
+        && request.auth.token.email.matches('.*@iimshillong[.]ac[.]in$');
+    }
+
+    match /office_timetables/{doc} {
+      allow read: if signedInInstitute();
+      allow write: if signedInInstitute();
+    }
+
+    match /users/{userId} {
+      allow read, write: if signedInInstitute() && request.auth.uid == userId;
+    }
+  }
+}
