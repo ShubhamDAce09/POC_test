@@ -28,7 +28,11 @@ class AppBootstrap {
     final prefs = await SharedPreferences.getInstance();
 
     analytics = AnalyticsService(enabled: firebaseReady);
-    auth = AuthService(prefs: prefs, firebaseReady: firebaseReady);
+    auth = AuthService(
+      prefs: prefs,
+      firebaseReady: firebaseReady,
+      analytics: analytics,
+    );
     timetable = TimetableRepository(
       prefs: prefs,
       firebaseReady: firebaseReady,

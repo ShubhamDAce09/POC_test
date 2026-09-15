@@ -5,8 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/student_profile.dart';
-import '../app_bootstrap.dart';
 import '../utils/email.dart';
+import 'analytics_service.dart';
 
 class AuthException implements Exception {
   AuthException(this.message);
@@ -19,9 +19,12 @@ class AuthService {
   AuthService({
     required SharedPreferences prefs,
     required this.firebaseReady,
-  }) : _prefs = prefs;
+    required AnalyticsService analytics,
+  })  : _prefs = prefs,
+        _analytics = analytics;
 
   final SharedPreferences _prefs;
+  final AnalyticsService _analytics;
   final bool firebaseReady;
   final _localController = StreamController<StudentProfile?>.broadcast();
 
@@ -64,7 +67,7 @@ class AuthService {
         if (profile == null) {
           throw AuthException('Sign-in succeeded but no user was returned.');
         }
-        await AppBootstrap.analytics.logLogin(method: 'password');
+        await _analytics.logLogin(method: 'password');
         return profile;
       } on FirebaseAuthException catch (error) {
         throw AuthException(_mapFirebase(error));
@@ -77,7 +80,7 @@ class AuthService {
     );
     await _persistLocal(profile);
     _localController.add(profile);
-    await AppBootstrap.analytics.logLogin(method: 'demo');
+    await _analytics.logLogin(method: 'demo');
     return profile;
   }
 
@@ -101,7 +104,7 @@ class AuthService {
         if (profile == null) {
           throw AuthException('Registration succeeded but no user was returned.');
         }
-        await AppBootstrap.analytics.logLogin(method: 'register');
+        await _analytics.logLogin(method: 'register');
         return profile;
       } on FirebaseAuthException catch (error) {
         throw AuthException(_mapFirebase(error));

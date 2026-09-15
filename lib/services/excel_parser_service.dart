@@ -63,7 +63,7 @@ class ExcelParserService {
     final sessions = <ClassSession>[];
     for (var r = headerIndex + 1; r < sheet.maxRows; r++) {
       final values = _cells(sheet, r);
-      if (values.every((v) => v.trim().isEmpty)) continue;
+      if (values.isEmpty || values.every((v) => v.trim().isEmpty)) continue;
 
       final day = _parseDay(values[_safe(col['day']!, values)]);
       final start = _parseTime(values[_safe(col['start']!, values)]);
@@ -173,8 +173,11 @@ class ExcelParserService {
   String _normalizeHeader(String raw) =>
       raw.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
 
-  int _safe(int index, List<String> values) =>
-      index < values.length ? index : values.length - 1;
+  int _safe(int index, List<String> values) {
+    if (values.isEmpty) return 0;
+    if (index < 0) return 0;
+    return index < values.length ? index : values.length - 1;
+  }
 
   int? _parseDay(String raw) {
     final value = raw.trim().toLowerCase();

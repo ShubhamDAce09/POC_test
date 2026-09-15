@@ -70,7 +70,9 @@ Events logged by the app (Analytics → Events):
 | `subject_selection` | Electives saved |
 | `reminder_trigger` | Reminder scheduled (`phase=scheduled`) or opened (`phase=opened`) |
 
-You do not need an in-app admin dashboard; open [Firebase Analytics](https://console.firebase.google.com/) as the project owner.
+You do not need an in-app admin dashboard. As project owner (`shubham.pgpex26@iimshillong.ac.in`), open [Firebase Analytics](https://console.firebase.google.com/) → **Analytics → Events / Dashboard** for login, upload, selection, reminder, and app-open counts.
+
+Publish security rules with `firebase deploy --only firestore:rules` after `firebase login` (uses `firebase.json` + `firestore.rules` in this repo).
 
 ## Run locally
 

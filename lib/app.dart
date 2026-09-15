@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../app_bootstrap.dart';
-import '../models/student_profile.dart';
-import '../models/timetable.dart';
-import '../screens/login_screen.dart';
-import '../screens/subject_selection_screen.dart';
-import '../screens/timetable_screen.dart';
-import '../screens/upload_screen.dart';
-import '../utils/app_theme.dart';
-import '../utils/constants.dart';
+import 'app_bootstrap.dart';
+import 'models/student_profile.dart';
+import 'models/timetable.dart';
+import 'screens/login_screen.dart';
+import 'screens/subject_selection_screen.dart';
+import 'screens/timetable_screen.dart';
+import 'screens/upload_screen.dart';
+import 'utils/app_theme.dart';
+import 'utils/constants.dart';
 
 class CommunityApp extends StatelessWidget {
   const CommunityApp({super.key});
@@ -79,14 +79,20 @@ class _SessionGateState extends State<SessionGate> {
     return FutureBuilder<_SessionData>(
       future: _future,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState != ConnectionState.done) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
         if (snapshot.hasError) {
           return Scaffold(
-            body: Center(child: Text('Could not load timetable: ${snapshot.error}')),
+            appBar: AppBar(title: const Text(AppConstants.appName)),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text('Could not load timetable: ${snapshot.error}'),
+              ),
+            ),
           );
         }
         final data = snapshot.data!;
