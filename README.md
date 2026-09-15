@@ -83,8 +83,8 @@ flutter test
 flutter run
 ```
 
-- **Android:** `flutter build apk --debug` (verified in this environment)
-- **iOS:** on macOS, `flutter build ios --debug --no-codesign` (Xcode is required for a native iOS binary). GitHub Actions on `macos-latest` runs that compile. This Linux environment still compiles the Dart/iOS asset bundle with `flutter build bundle --target-platform=ios`.
+- **Android:** `flutter build apk --debug` (verified here: `build/app/outputs/flutter-apk/app-debug.apk`)
+- **iOS:** Native compile requires macOS + Xcode (`flutter build ios --debug --no-codesign`). Linux Flutter SDKs do not expose the `ios` build subcommand. GitHub Actions on `macos-latest` runs that compile.
 
 ## Android / iOS notes
 
