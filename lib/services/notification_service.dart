@@ -74,9 +74,13 @@ class NotificationService {
   }
 
   Future<void> syncReminders(List<ClassSession> sessions) async {
-    await _plugin.cancelAll();
-    for (final session in sessions) {
-      await _schedule(session);
+    try {
+      await _plugin.cancelAll();
+      for (final session in sessions) {
+        await _schedule(session);
+      }
+    } catch (error) {
+      debugPrint('Reminder sync skipped: $error');
     }
   }
 

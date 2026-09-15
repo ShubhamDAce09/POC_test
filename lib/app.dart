@@ -72,7 +72,11 @@ class _SessionGateState extends State<SessionGate> {
     return _SessionData(timetable: timetable, profile: profile);
   }
 
-  void _reload() => setState(() => _future = _load());
+  void _reload() {
+    setState(() {
+      _future = _load();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
